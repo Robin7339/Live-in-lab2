@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Drag & Drop Spelling Game</title>
+    <link rel="stylesheet" href="style.css"> <!-- Direct reference to the style.css -->
+    <script defer src="script.js"></script> <!-- Direct reference to the script.js -->
+    <style>
+        /* Keep inline CSS for layout/quick testing. If preferred, move this into style.css later. */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4, #ffdde1);
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #timer {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #34495e;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-bar-fill {
+            height: 20px;
+            background-color: #27ae60;
+            width: 100%;
+            transition: width 1s linear;
+        }
+
+        #word-container, #letters-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .letter, .blank-space {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .letter {
+            background-color: transparent;
+            border: 2px solid #222;
+            color: white;
+            animation: rainbow 3s infinite linear;
+        }
+
+        .letter:hover {
+            transform: scale(1.1);
+            opacity: 0.9;
+        }
+
+        @keyframes rainbow {
+            100% { background-color: red; }
+        }
+
+        .blank-space {
+            border: 2px dashed #bbb;
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .button {
+            margin-top: 15px;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: white;
+        }
+
+        #next-level { background: #27ae60; }
+        #get-hint { background: #e67e22; }
+        #retry-level { background: #3498db; display: none; }
+
+        .back-button {
+            background: #e74c3c;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 12px 16px;
+            font-size: 16px;
+        }
+
+        #feedback {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <a href="#" class="button back-button">Back to Home</a>
+    <div class="container">
+        <h1>Drag & Drop Spelling Game</h1>
+        <div id="timer">Time Left: <span id="time">30</span>s</div>
+        <div class="progress-bar"><div class="progress-bar-fill" id="progress-fill"></div></div>
+
+        <div id="image-container">
+            <img id="word-image" src="" alt="Word Image" />
+        </div>
+
+        <div id="word-container"></div>
+        <div id="letters-container"></div>
+
+        <button id="get-hint" class="button">Get Hint</button>
+        <button id="next-level" class="button" style="display: none;">Next Level</button>
+        <button id="retry-level" class="button">Retry Level</button>
+        <div id="feedback"></div>
+
+        <audio id="correct-sound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_27ebff38b7.mp3" preload="auto"></audio>
+        <audio id="wrong-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_795e6e0cbd.mp3" preload="auto"></audio>
+    </div>
+    <script>
+        const words = [
+    { word: "CAT", image: "cat.jpeg", phonetic: "kæt" },
+    { word: "DOG", image: "dog.jpeg", phonetic: "dɔːg" },
+    { word: "LION", image: "lion.jpg", phonetic: "ˈlaɪən" },
+    { word: "FISH", image: "fish.jpeg", phonetic: "fɪʃ" },
+    { word: "BIRD", image: "bird.jpg", phonetic: "bɜːrd" },
+    { word: "HORSE", image: "horse.jpg", phonetic: "hɔːrs" },
+    { word: "ZEBRA", image: "zebra.jpg", phonetic: "ˈziːbrə" }
+];
+
+let currentLevel = 0;
+const alphabet = "ABCDEFGHIJKLMNOPRSTUVWYZ".split("");
+const qTable = {};
+const learningRate = 0.1;
+const discountFactor = 0.9;
+
+const wordContainer = document.getElementById("word-container");
+const lettersContainer = document.getElementById("letters-container");
+const feedback = document.getElementById("feedback");
+const nextLevelBtn = document.getElementById("next-level");
+const retryLevelBtn = document.getElementById("retry-level");
+const wordImage = document.getElementById("word-image");
+const timerDisplay = document.getElementById("time");
+const progressFill = document.getElementById("progress-fill");
+
+const correctSound = document.getElementById("correct-sound");
+const wrongSound = document.getElementById("wrong-sound");
+
+let timerInterval;
+let timeLeft = 30;
+
+function loadLevel() {
+    clearInterval(timerInterval);
+    timeLeft = 30;
+    timerDisplay.textContent = timeLeft;
+    progressFill.style.width = "100%";
+    startTimer();
+
+    wordContainer.innerHTML = "";
+    lettersContainer.innerHTML = "";
+    feedback.textContent = "";
+    nextLevelBtn.style.display = "none";
+    retryLevelBtn.style.display = "none";
+
+    const levelData = words[currentLevel];
+    wordImage.src = levelData.image;  // This will now work, as the image is in the same directory
+    wordImage.alt = levelData.word;
+
+    levelData.word.split("").forEach(() => {
+        const blankSpace = document.createElement("div");
+        blankSpace.classList.add("blank-space");
+        blankSpace.dataset.empty = "true";
+        blankSpace.ondrop = drop;
+        blankSpace.ondragover = allowDrop;
+        wordContainer.appendChild(blankSpace);
+    });
+
+    alphabet.forEach(letter => {
+        const letterDiv = document.createElement("div");
+        letterDiv.classList.add("letter");
+        letterDiv.textContent = letter;
+        letterDiv.draggable = true;
+        letterDiv.ondragstart = drag;
+        letterDiv.onclick = () => speak(letter);
+        letterDiv.style.backgroundColor = getRandomColor();
+        lettersContainer.appendChild(letterDiv);
+    });
+
+    speak(levelData.phonetic);
+}
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = timeLeft;
+        progressFill.style.width = `${(timeLeft / 30) * 100}%`;
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            feedback.textContent = "Time's up! Try again.";
+            speak("Time's up! Try again.");
+            retryLevelBtn.style.display = "inline-block";
+        }
+    }, 1000);
+}
+
+function allowDrop(event) {
+    event.preventDefault();
+}
+
+function drag(event) {
+    const letter = event.target.textContent;
+    event.dataTransfer.setData("text", letter);
+    speak(letter);
+}
+
+function drop(event) {
+    event.preventDefault();
+    const data = event.dataTransfer.getData("text");
+    const blanks = Array.from(wordContainer.children);
+    const position = blanks.indexOf(event.target);
+    const correctWord = words[currentLevel].word;
+
+    if (event.target.dataset.empty === "true" && data === correctWord[position]) {
+        event.target.textContent = data;
+        event.target.dataset.empty = "false";
+        event.target.style.backgroundColor = "lightgreen";
+        feedback.textContent = "Correct!";
+        correctSound.play();
+        updateQTable(correctWord, 1);
+        checkAnswer();
+    } else {
+        feedback.textContent = "Incorrect. Try again!";
+        wrongSound.play();
+        speak("That's not correct. Try again!");
+        updateQTable(correctWord, -1);
+    }
+}
+
+function checkAnswer() {
+    const answer = Array.from(wordContainer.children).map(div => div.textContent).join("");
+    const correctAnswer = words[currentLevel].word;
+    if (answer === correctAnswer) {
+        nextLevelBtn.style.display = "inline-block";
+    }
+}
+
+function updateQTable(word, reward) {
+    if (!qTable[word]) {
+        qTable[word] = {};
+    }
+
+    for (const letter of word) {
+        if (!qTable[word][letter]) {
+            qTable[word][letter] = Math.random();
+        }
+    }
+
+    for (const letter of word) {
+        const maxQValue = Math.max(...Object.values(qTable[word]));
+        qTable[word][letter] += learningRate * (reward + discountFactor * maxQValue - qTable[word][letter]);
+    }
+}
+
+function speak(phrase) {
+    const speech = new SpeechSynthesisUtterance(phrase);
+    speech.lang = "en-US";
+    window.speechSynthesis.speak(speech);
+}
+
+function getRandomColor() {
+    const letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+document.getElementById("next-level").addEventListener("click", () => {
+    currentLevel++;
+    if (currentLevel < words.length) {
+        loadLevel();
+    } else {
+        feedback.textContent = "You completed all levels!";
+        nextLevelBtn.style.display = "none";
+    }
+});
+
+document.getElementById("retry-level").addEventListener("click", loadLevel);
+
+loadLevel();
+</script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Card Example</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300&display=swap');
+
+    body {
+      background-image: url(images/model8.jpg);
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .container {
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      background-color: rgba(17, 25, 40, 0.25);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.125);
+      padding: 38px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .car-card, .car-card1, .car-card2, .car-card3, .car-card4 {
+      width:30%;
+      margin: 20px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .wrapper {
+      width: 100%;
+      height: 100%;
+    }
+
+    .banner-image {
+      background-position: center;
+      background-size: cover;
+      height: 300px;
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255, 0.255);
+    }
+
+    h1 {
+      font-family: 'Righteous', sans-serif;
+      color: rgba(255,255,255,0.98);
+      text-transform: uppercase;
+      font-size: 2.4rem;
+    }
+
+    p {
+      color: #fff;
+      font-family: 'Lato', sans-serif;
+      text-align: center;
+      font-size: 0.8rem;
+      line-height: 150%;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .button-wrapper {
+      margin-top: 18px;
+    }
+
+    .btn {
+      border: none;
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      cursor: pointer;
+    }
+
+    .btn + .btn {
+      margin-left: 10px;
+    }
+
+    .outline {
+      background: transparent;
+      color: rgba(0, 212, 255, 0.9);
+      border: 1px solid rgba(0, 212, 255, 0.6);
+      transition: all 0.3s ease;
+    }
+
+    .outline:hover {
+      transform: scale(1.125);
+      color: rgba(255, 255, 255, 0.9);
+      border-color: rgba(255, 255, 255, 0.9);
+      transition: all 0.3s ease;
+    }
+
+    .fill {
+      background: rgba(0, 212, 255, 0.9);
+      color: rgba(255,255,255,0.95);
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .fill:hover {
+      transform: scale(1.125);
+      border-color: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 5px rgba(0,0,0,0.125);
+      transition: all 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container car-card1">
+    <div class="wrapper">
+      <div class="banner-image" style="background-image: url(images/model2.jpeg);"></div>
+      <h1>Alphabetical Game</h1>
+      <p>Alphabet RL Game is an interactive voice-based learning game where players say words starting with randomly chosen letters. <br>It uses reinforcement learning logic to adapt difficulty based on user responses, making it fun and educational</p>
+    </div>
+    <div class="button-wrapper">
+      <button class="btn fill"> <a href="alphab.html" style="text-decoration: none; color:white" >Play</a></button>
+    </div>
+  </div>
+
+  <div class="container car-card2">
+    <div class="wrapper">
+      <div class="banner-image" style="background-image: url(images/model11.png);"></div>
+      <h1>DRAG AND DROP</h1>
+      <p>Alphabet RL Game is an engaging drag-and-drop learning game where users match letters with spoken words. It uses reinforcement logic to adapt the letter difficulty based on user performance, making learning interactive and personalized.</p>
+    </div>
+    <div class="button-wrapper">
+      <a href="Drag-drop/drag_and_drop.html"><button class="btn fill">Play</button></a>
+    </div>
+  </div>
+
+  <div class="container car-card3">
+    <div class="wrapper">
+      <div class="banner-image" style="background-image: url(images/model99.jpeg);"></div>
+      <h1>Guessing Game</h1>
+      <p>RL Guess Game is an interactive image-based word guessing game built with Flask. Players view pictures, type or speak their guesses, and receive instant feedback with rewards tracked for each attempt.</p>
+    </div>
+    <div class="button-wrapper">
+        <button class="btn fill"> <a href="http://127.0.0.1:5000/" style="text-decoration: none; color:white" >Play</a></button>
+    </div>
+  </div>
+
+  <div class="container car-card4">
+    <div class="wrapper">
+      <div class="banner-image" style="background-image: url(images/model44.jpg);"></div>
+      <h1>Nissan GTR</h1>
+      <p>Engineered to thrill,<br/>built to dominate.</p>
+    </div>
+    <div class="button-wrapper">
+      <button class="btn fill">Play</button>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alphabet RL Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: url('background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Arial', sans-serif;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      padding-top: 50px;
+    }
+
+    .letter {
+      font-size: 20vh;
+      font-weight: bold;
+      color: #ff3b3b;
+      border: 4px dashed white;
+      padding: 40px;
+      border-radius: 20px;
+      margin-top: 40px;
+      width: 200px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .message {
+      font-size: 1.5rem;
+      margin-top: 20px;
+      background-color: rgba(255, 255, 255, 0.2);
+      padding: 10px 20px;
+      border-radius: 10px;
+    }
+
+    .progress-bar-container {
+      width: 60%;
+      height: 20px;
+      border: 2px solid #fff;
+      margin-top: 40px;
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .progress-bar {
+      height: 100%;
+      background-color: limegreen;
+      width: 0%;
+    }
+
+    #startOverlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    #startOverlay h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      max-width: 80%;
+    }
+
+    #usernameInput {
+      padding: 10px;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: none;
+      width: 60%;
+    }
+
+    #startOverlay button {
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      background-color: limegreen;
+      border: none;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .alphabet-grid {
+      display: grid;
+      grid-template-columns: repeat(13, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+      width: 90%;
+    }
+
+    .alphabet-grid button {
+      padding: 10px;
+      font-size: 1rem;
+      background-color: #444;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .alphabet-grid button:hover {
+      background-color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div id="startOverlay">
+    <h1>Welcome! Enter your name to start the game.</h1>
+    <input type="text" id="usernameInput" placeholder="Enter your name..." />
+    <div class="alphabet-grid" id="alphabetGrid"></div>
+    <button onclick="startGame()">Start Game</button>
+  </div>
+
+  <div class="letter" id="letter">A</div>
+  <div class="message" id="message">Say a word starting with this letter!</div>
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <script>
+    const alphabet = [...Array(26)].map((_, i) => String.fromCharCode(65 + i));
+    let index = 0;
+    let rewards = {};
+    let totalScore = 0;
+    let isGameStarted = false;
+    let userName = "";
+
+    const letterElem = document.getElementById('letter');
+    const messageElem = document.getElementById('message');
+    const progressBar = document.getElementById('progressBar');
+    const startOverlay = document.getElementById('startOverlay');
+    const alphabetGrid = document.getElementById('alphabetGrid');
+
+    // Create the alphabet buttons
+    alphabet.forEach(letter => {
+      rewards[letter] = 1;
+      const btn = document.createElement('button');
+      btn.textContent = letter;
+      btn.onclick = () => speak("The letter is " + letter);
+      alphabetGrid.appendChild(btn);
+    });
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      speechSynthesis.speak(utterance);
+    }
+
+    function speakFeedback(message) {
+      const feedback = new SpeechSynthesisUtterance(message);
+      feedback.lang = 'en-US';
+      speechSynthesis.speak(feedback);
+    }
+
+    function selectNextLetter() {
+      const weightedLetters = alphabet.flatMap(l => Array(rewards[l]).fill(l));
+      const next = weightedLetters[Math.floor(Math.random() * weightedLetters.length)];
+      index = alphabet.indexOf(next);
+    }
+
+    function updateScreen() {
+      const letter = alphabet[index];
+      letterElem.textContent = letter;
+      messageElem.textContent = `${userName}, say a word starting with this letter!`;
+      progressBar.style.width = `${((index + 1) / alphabet.length) * 100}%`;
+      speak("The letter is " + letter);
+    }
+
+    function listen() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+
+      recognition.onresult = function (event) {
+        const spoken = event.results[0][0].transcript.toLowerCase();
+        const expectedLetter = alphabet[index].toLowerCase();
+
+        if (spoken.startsWith(expectedLetter)) {
+          totalScore++;
+          rewards[alphabet[index]] = Math.max(1, rewards[alphabet[index]] - 1);
+          const successMessage = `✅ Great job, ${userName}! You said: "${spoken}"`;
+          messageElem.textContent = successMessage;
+          speakFeedback(`Correct, ${userName}. Well done!`);
+          setTimeout(() => {
+            selectNextLetter();
+            updateScreen();
+            listen();
+          }, 2000);
+        } else {
+          rewards[alphabet[index]]++;
+          const errorMessage = `❌ Try again, ${userName}! You said: "${spoken}". Let's try a word starting with ${expectedLetter.toUpperCase()}.`;
+          messageElem.textContent = errorMessage;
+          speakFeedback(`Oops, ${userName}. Try again with a word starting with ${expectedLetter}`);
+          setTimeout(() => listen(), 2000);
+        }
+      };
+
+      recognition.onerror = function () {
+        messageElem.textContent = `⚠ Speech recognition error, ${userName}. Try again.`;
+        speakFeedback(`Speech recognition error, ${userName}. Please try again.`);
+        setTimeout(() => listen(), 3000);
+      };
+
+      recognition.start();
+    }
+
+    function startGame() {
+      const input = document.getElementById('usernameInput').value.trim();
+      if (!input) {
+        alert("Please enter your name.");
+        return;
+      }
+      userName = input.charAt(0).toUpperCase() + input.slice(1); // Capitalize name
+      startOverlay.style.display = 'none';
+      isGameStarted = true;
+      updateScreen();
+      listen();
+    }
+  </script>
+</body>
+</html>

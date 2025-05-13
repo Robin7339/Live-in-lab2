@@ -1,0 +1,235 @@
+from flask import Flask, render_template_string, request, send_from_directory, jsonify
+import random
+
+app = Flask(__name__)
+
+# Game images and correct answers
+images = [
+    {"filename": "1.jpeg", "label": "dog"},
+    {"filename": "2.jpeg", "label": "cat"},
+    {"filename": "3.jpeg", "label": "elephant"},
+    {"filename": "4.jpg", "label": "lion"},
+    {"filename": "5.jpeg", "label": "tiger"},
+    {"filename": "6.jpg", "label": "parrot"}
+]
+
+rewards = []
+
+@app.route('/')
+def index():
+    return render_template_string("""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Textopia RL Guess Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-image: url('/static/model88.jpg');
+            background-size: cover;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+            color: #fff;
+            text-align: center;
+        }
+        .container {
+            background-color: rgba(0, 0, 0, 0.75);
+            padding: 30px;
+            margin: 50px auto;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #00ffd5;
+        }
+        img {
+            width: 80%;
+            max-width: 300px;
+            border: 5px solid #00ffd5;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 10px;
+            font-size: 18px;
+            border-radius: 8px;
+            border: none;
+            width: 60%;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #00ffd5;
+            color: #000;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #00c7aa;
+        }
+        #feedback {
+            font-size: 20px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        #score {
+            font-size: 22px;
+            margin-top: 20px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            margin: 5px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="game-area">
+        <h1>🎮 Textopia - Guess the Picture</h1>
+        <img id="image" src="" alt="Loading..."><br>
+        <input type="text" id="guess" placeholder="Type your guess..." />
+        <div>
+            <button onclick="submitGuess()">Submit</button>
+            <button onclick="startVoice()">🎤 Speak</button>
+        </div>
+        <p id="feedback"></p>
+        <p id="score">Score: 0</p>
+    </div>
+
+    <div class="container" id="end-area" style="display:none;">
+        <h2>🏁 Game Over</h2>
+        <p id="final-score"></p>
+        <ul id="summary-list"></ul>
+    </div>
+
+<script>
+    const imageData = {{ images | tojson }};
+    let index = 0;
+    let score = 0;
+    let results = [];
+
+    const imgEl = document.getElementById("image");
+    const feedback = document.getElementById("feedback");
+    const guessInput = document.getElementById("guess");
+
+    function speak(text) {
+        const synth = window.speechSynthesis;
+        if (synth.speaking) {
+            synth.cancel();
+        }
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'en-US';
+        synth.speak(utter);
+    }
+
+    function loadImage() {
+        if (index >= imageData.length) {
+            document.getElementById("game-area").style.display = "none";
+            document.getElementById("end-area").style.display = "block";
+            document.getElementById("final-score").innerText = `🎉 You scored ${score} out of ${imageData.length}`;
+            speak(`Game over! You scored ${score} out of ${imageData.length}`);
+            const ul = document.getElementById("summary-list");
+            results.forEach(r => {
+                const li = document.createElement("li");
+                li.innerText = `${r.filename} - Your guess: ${r.user_guess} - ${r.status}`;
+                ul.appendChild(li);
+            });
+            return;
+        }
+        imgEl.src = "/static/images/" + imageData[index].filename;
+        guessInput.value = "";
+        feedback.innerText = "";
+    }
+
+    function submitGuess() {
+        const userGuess = guessInput.value.trim().toLowerCase();
+        const correct = imageData[index].label.toLowerCase();
+        let isCorrect = (userGuess === correct);
+
+        results.push({
+            filename: imageData[index].filename,
+            user_guess: userGuess,
+            status: isCorrect ? "✅ Correct" : `❌ Wrong (Answer: ${correct})`
+        });
+
+        if (isCorrect) {
+            score++;
+            feedback.style.color = "#00ff88";
+            feedback.innerText = "✅ Great job!";
+            speak("Great job! That's correct.");
+        } else {
+            feedback.style.color = "#ff4b5c";
+            feedback.innerText = `❌ Oops! It was '${correct}'`;
+            speak(`Oops! It was ${correct}`);
+        }
+
+        fetch('/api/feedback', {
+            method: "POST",
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                image: imageData[index].filename,
+                guess: userGuess,
+                correct: isCorrect
+            })
+        });
+
+        document.getElementById("score").innerText = `Score: ${score}`;
+        index++;
+        setTimeout(loadImage, 2000);
+    }
+
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+
+    function startVoice() {
+        recognition.start();
+    }
+
+    recognition.onresult = function(event) {
+        const result = event.results[0][0].transcript;
+        guessInput.value = result;
+        submitGuess();
+    };
+
+    window.onload = function() {
+        speak("Welcome to Textopia. Let's play the guess the picture game!");
+        loadImage();
+    };
+</script>
+</body>
+</html>
+""", images=random.sample(images, len(images)))
+
+@app.route('/api/feedback', methods=['POST'])
+def feedback():
+    data = request.get_json()
+    rewards.append({
+        "image": data["image"],
+        "guess": data["guess"],
+        "correct": data["correct"],
+        "reward": 1 if data["correct"] else 0
+    })
+    return jsonify(success=True)
+
+@app.route('/static/images/<path:filename>')
+def static_images(filename):
+    return send_from_directory('static/images', filename)
+
+@app.route('/static/<path:filename>')
+def static_file(filename):
+    return send_from_directory('static', filename)
+
+if __name__ == '__main__':
+    app.run(debug=True)
