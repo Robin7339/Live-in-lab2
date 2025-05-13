@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .header-fixed {
+	background-color:black;
+	box-shadow:0 1px 1px #ccc;
+
+	color: #ffffff;
+	box-sizing: border-box;
+	top:-100px;
+
+	-webkit-transition:top 0.3s;
+	transition:top 0.3s;
+}
+
+.header-fixed .header-limiter {
+	max-width: 1200px;
+	text-align: center;
+	margin: 0 auto;
+}
+
+/*	The header placeholder. It is displayed when the header is fixed to the top of the
+	browser window, in order to prevent the content of the page from jumping up. */
+
+.header-fixed-placeholder{
+	height: 80px;
+	display: none;
+}
+
+/* Logo */
+
+.header-fixed .header-limiter img {
+	float: left;
+	font: normal 28px Cookie, Arial, Helvetica, sans-serif;
+	line-height: 40px;
+	margin: 0;
+}
+
+
+
+/* The navigation links */
+
+.header-fixed .header-limiter a {
+	color: #ffffff;
+	text-decoration: none;
+}
+
+.header-fixed .header-limiter nav {
+	font:16px Arial, Helvetica, sans-serif;
+	line-height: 40px;
+	float: right;
+}
+
+.header-fixed .header-limiter nav a{
+	display: inline-block;
+	padding: 0 5px;
+	text-decoration:none;
+	color: #ffffff;
+	opacity: 0.9;
+}
+
+.header-fixed .header-limiter nav a:hover{
+	opacity: 1;
+}
+
+.header-fixed .header-limiter nav a.selected {
+	color: black;
+	pointer-events: none;
+	opacity: 1;
+}
+
+/* Fixed version of the header */
+
+body.fixed .header-fixed {
+	padding: 10px 40px;
+	height: 50px;
+	position: fixed;
+	width: 100%;
+	top: 0;
+	left: 0;
+	z-index: 1;
+}
+
+body.fixed .header-fixed-placeholder {
+	display: block;
+}
+
+body.fixed .header-fixed .header-limiter h1 {
+	font-size: 24px;
+	line-height: 30px;
+}
+
+body.fixed .header-fixed .header-limiter nav {
+	line-height: 28px;
+	font-size: 13px;
+}
+
+
+/* Making the header responsive */
+
+@media all and (max-width: 600px) {
+
+	.header-fixed {
+		padding: 20px 0;
+		height: 75px;
+	}
+
+	.header-fixed .header-limiter h1 {
+		float: none;
+		margin: -8px 0 10px;
+		text-align: center;
+		font-size: 24px;
+		line-height: 1;
+	}
+
+	.header-fixed .header-limiter nav {
+		line-height: 1;
+		float:none;
+	}
+
+	.header-fixed .header-limiter nav a {
+		font-size: 13px;
+	}
+
+	body.fixed .header-fixed {
+		display: none;
+	}
+
+}
+
+/*
+	 We are clearing the body's margin and padding, so that the header fits properly.
+	 We are also adding a height to demonstrate the scrolling behavior. You can remove
+	 these styles.
+ */
+
+body {
+	margin: 0;
+	padding: 0;
+	height: 1500px;
+}
+.banner {
+  position: relative;
+  height: 80vh;
+  background-image: url("images/banner2.jpg");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-align: center;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3); /* Light black shadow */
+  z-index: -1;
+}
+
+
+    .banner h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .banner p {
+      font-size: 22px;
+      max-width: 600px;
+    }
+
+
+    .login-section {
+      margin-left: 10%;
+      display: flex;
+      justify-content: center;
+    }
+    .login-form {
+      background: #f4f4f4;
+      padding: 30px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    .login-form h2 {
+      margin-bottom: 20px;
+      color: black;
+    }
+    .login-form input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .login-form button {
+      width: 100%;
+      background: #000000;
+      color: white;
+      padding: 12px;
+      border: none;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .login-form button:hover {
+      background: #070707;
+    }
+
+    .wave-text span {
+  display: inline-block;
+  font-size: 3rem;
+  animation: wave 2s ease-in-out infinite;
+}
+
+.wave-text span:nth-child(1) { animation-delay: 0s; }
+.wave-text span:nth-child(2) { animation-delay: 0.1s; }
+.wave-text span:nth-child(3) { animation-delay: 0.2s; }
+.wave-text span:nth-child(4) { animation-delay: 0.3s; }
+.wave-text span:nth-child(5) { animation-delay: 0.4s; }
+.wave-text span:nth-child(6) { animation-delay: 0.5s; }
+.wave-text span:nth-child(7) { animation-delay: 0.6s; }
+.wave-text span:nth-child(8) { animation-delay: 0.7s; }
+
+@keyframes wave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+nav a.selected {
+  color:black;
+  pointer-events: none;
+  opacity: 1;
+}
+
+
+
+  </style>
+</head>
+<body>
+
+    <header class="header-fixed">
+        <div class="header-limiter" style="display: flex; align-items: center; justify-content: space-between;">
+          <div class="logo"  style="width: 15%">
+            <img src="images/logo-removebg-preview.png" alt="Lo go" style="width:100%">
+          </div>
+          <nav>
+            <a href="#home" class="nav-link">Home</a>
+            <a href="#game-section" class="nav-link" >Games</a>
+            <a href="# ">About</a>
+            <a href="# ">Contact</a>
+          </nav>
+        </div>
+      </header>
+      
+      
+      <section class="banner" id="home">
+        <div style="text-align: center; max-width: 600px;">
+            <div class="wave-container">
+                <h1 class="wave-text ">
+                  <span>T</span><span>E</span><span>X</span><span>T</span><span>O</span><span>P</span><span>I</span><span>A</span>
+                </h1>
+              </div>
+              
+          <p>
+            A fun and educational game designed to help children with dyslexia improve reading and spelling through adaptive reinforcement learning.
+          </p>
+      
+          <!-- Login Form -->
+         <!-- Login Form -->
+<div id="login-container" style="margin-top: 30px; margin-left: 60px;">
+  <form class="login-form" id="login-form">
+    <h2>Login</h2>
+    <input type="email" placeholder="Email" required>
+    <input type="password" placeholder="Password" required>
+    <button type="submit">Login</button>
+  </form>
+</div>
+
+<!-- Name & Age Form (Initially Hidden) -->
+<div id="info-form-container" style="display: none; margin-top: 30px; margin-left: 60px;">
+  <form class="login-form" id="info-form">
+    <h2>Tell us more!</h2>
+    <input type="text" placeholder="Your Name" required>
+    <input type="number" placeholder="Your Age" required>
+    <button type="submit"> <a href="Siva123.html" style="text-decoration: none; color:white" >Continue</a>
+    </button>
+  </form>
+</div>
+
+  
+
+        </div>
+      </section>
+      
+      
+
+
+<!-- You need this element to prevent the content of the page from jumping up -->
+<div class="header-fixed-placeholder"></div>
+
+<!-- The content of your page would go here. -->
+
+  
+
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script>
+const sections = document.querySelectorAll("section");
+const navLinks = document.querySelectorAll(".nav-link");
+
+window.addEventListener("scroll", () => {
+  let current = "";
+
+  sections.forEach((section) => {
+    const sectionTop = section.offsetTop - 100;
+    if (scrollY >= sectionTop) {
+      current = section.getAttribute("id");
+    }
+  });
+
+  navLinks.forEach((link) => {
+    link.classList.remove("selected");
+    if (link.getAttribute("href") === "#" + current) {
+      link.classList.add("selected");
+    }
+  });
+});
+
+	$(document).ready(function(){
+
+		var showHeaderAt = 150;
+
+		var win = $(window),
+				body = $('body');
+
+		// Show the fixed header only on larger screen devices
+
+		if(win.width() > 400){
+
+			// When we scroll more than 150px down, we set the
+			// "fixed" class on the body element.
+
+			win.on('scroll', function(e){
+
+				if(win.scrollTop() > showHeaderAt) {
+					body.addClass('fixed');
+				}
+				else {
+					body.removeClass('fixed');
+				}
+			});
+
+		}
+
+	});
+
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    document.querySelector('.login-form').style.display = 'none';
+    document.getElementById('info-form-container').style.display = 'block';
+  });
+
+  document.getElementById('info-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = this.querySelector('input[type="text"]').value;
+    const age = this.querySelector('input[type="number"]').value;
+
+    // Hide only the form, not the heading/banner
+    document.getElementById('info-form-container').style.display = 'none';
+    document.getElementById('game-section').style.display = 'block';
+
+    // Personalized greeting
+    document.getElementById('greeting-text').innerText = `Hello ${name} (Age: ${age})! Let’s start playing.`;
+  });
+
+   // When login is submitted
+   document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    document.querySelector('.login-form').style.display = 'none';
+    document.getElementById('info-form-container').style.display = 'block';
+  });
+
+</script>
+
+
+</body>
+</html>
